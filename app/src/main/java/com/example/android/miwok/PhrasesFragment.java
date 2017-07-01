@@ -1,42 +1,33 @@
-/*
- * Copyright (C) 2016 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.example.android.miwok;
+
 
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class ColorsActivity extends AppCompatActivity {
+/**
+ * A simple {@link Fragment} subclass.
+ */
+public class PhrasesFragment extends Fragment {
 
-    //gets media player private variable
-    private MediaPlayer mediaPlayer;
+    //* Handles Audio playback //
+    private MediaPlayer mMediaPlayer;
+
+    //** Handles audio focus //
+
     private AudioManager mAudioManager;
 
-
-
-
-
-
+    View rootView;
     //** Triggers when th audio focus changes **/
 
     private AudioManager.OnAudioFocusChangeListener mOnAudioFocusChangeListener = new AudioManager.OnAudioFocusChangeListener(){
@@ -47,7 +38,7 @@ public class ColorsActivity extends AppCompatActivity {
                 // temporarily stolen, but will be back soon.
                 // i.e. for a phone call
 
-                mediaPlayer.pause();
+                mMediaPlayer.pause();
 
             } else if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
                 // Stop playback, because you lost the Audio Focus.
@@ -56,7 +47,7 @@ public class ColorsActivity extends AppCompatActivity {
                 // And release the kra — Audio Focus!
                 // You’re done.
 
-                mediaPlayer.stop();
+                mMediaPlayer.stop();
                 releaseMediaPlayer();
 
             } else if (focusChange ==
@@ -66,8 +57,8 @@ public class ColorsActivity extends AppCompatActivity {
                 // i.e. for notifications or navigation directions
                 // Depending on your audio playback, you may prefer to
                 // pause playback here instead. You do you.
-                mediaPlayer.pause();
-                mediaPlayer.seekTo(0);
+                mMediaPlayer.pause();
+                mMediaPlayer.seekTo(0);
 
             } else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
                 // Resume playback, because you hold the Audio Focus
@@ -77,7 +68,7 @@ public class ColorsActivity extends AppCompatActivity {
                 // If you implement ducking and lower the volume, be
                 // sure to return it to normal here, as well.
 
-                mediaPlayer.start();
+                mMediaPlayer.start();
             }
         }
     };
@@ -95,55 +86,75 @@ public class ColorsActivity extends AppCompatActivity {
     };
 
 
+    public PhrasesFragment() {
+        // Required empty public constructor
+    }
+
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.word_list);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
 
+        rootView = inflater.inflate(R.layout.word_list, container, false);
+
+
+
+        // Create a list of words
         ArrayList<Word> words = new ArrayList<Word>();
+        words.add(new Word("Where are you going?", "minto wuksus",R.raw.phrase_where_are_you_going));
+        words.add(new Word("What is your name?", "tinnә oyaase'nә",R.raw.phrase_what_is_your_name));
+        words.add(new Word("My name is...", "oyaaset...",R.raw.phrase_my_name_is));
+        words.add(new Word("How are you feeling?", "michәksәs?",R.raw.phrase_how_are_you_feeling));
+        words.add(new Word("I’m feeling good.", "kuchi achit",R.raw.phrase_im_feeling_good));
+        words.add(new Word("Are you coming?", "әәnәs'aa?",R.raw.phrase_are_you_coming));
+        words.add(new Word("Yes, I’m coming.", "hәә’ әәnәm",R.raw.phrase_yes_im_coming));
+        words.add(new Word("I’m coming.", "әәnәm",R.raw.phrase_im_coming));
+        words.add(new Word("Let’s go.", "yoowutis",R.raw.phrase_lets_go));
+        words.add(new Word("Come here.", "әnni'nem",R.raw.phrase_come_here));
 
-        words.add(new Word("red", "weṭeṭṭi",R.drawable.color_red,R.raw.color_red));
-        words.add(new Word("mustard yellow", "chiwiiṭә",R.drawable.color_mustard_yellow,R.raw.color_mustard_yellow));
-        words.add(new Word("dusty yellow", "ṭopiisә",R.drawable.color_dusty_yellow,R.raw.color_dusty_yellow));
-        words.add(new Word("green", "chokokki",R.drawable.color_green,R.raw.color_green));
-        words.add(new Word("brown", "ṭakaakki",R.drawable.color_brown,R.raw.color_brown));
-        words.add(new Word("gray", "ṭopoppi",R.drawable.color_gray,R.raw.color_gray));
-        words.add(new Word("black", "kululli",R.drawable.color_black,R.raw.color_black));
-        words.add(new Word("white", "kelelli",R.drawable.color_white,R.raw.color_white));
+        //Create wordadapter by passing arraylist
+        WordAdapter  adapter = new WordAdapter(getActivity(),words,R.color.category_phrases);
 
 
-        //Create a new adapter and pass data from Arraylist
-        WordAdapter adapter = new WordAdapter(this,words,R.color.category_colors);
 
-        //get the list view arrangeent
-        ListView listView = (ListView)findViewById(R.id.list);
+        // Finding View Hierarchy for list and store it in listView
+        ListView listView = (ListView) rootView.findViewById(R.id.list);
 
-        //Give data to the list View
+        // Associate the ArrayAdapter with the ListView
         listView.setAdapter(adapter);
 
 
 
 
 
-
         //create instance of audioManager
-        mAudioManager = (AudioManager) getBaseContext().getSystemService(Context.AUDIO_SERVICE);
+        mAudioManager = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
 
 
 
+
+
+
+        //listener for list View and modify
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView parent, View view, int position,
                                     long id) {
+                // get the current word in the AdapterView and cast to Word
                 Word crrentWord = (Word) parent.getItemAtPosition(position);
 
+                //get is particular audio ID
                 int crrentAudio = crrentWord.getmAudioId();
 
 
 
                 //Release Meadia player if it currently exist
                 releaseMediaPlayer();
+
+
+
+
 
 
                 // Request audio focus for playback
@@ -155,8 +166,6 @@ public class ColorsActivity extends AppCompatActivity {
 
 
 
-
-
                 if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
 
                     //We have Audio focus now
@@ -164,17 +173,17 @@ public class ColorsActivity extends AppCompatActivity {
 
 
                     //create a mediaPlayer instance with current cotenxt
-                    mediaPlayer = MediaPlayer.create(ColorsActivity.this, crrentAudio);
+                    mMediaPlayer = MediaPlayer.create(getActivity(), crrentAudio);
 
 
 
                     // start playing audio
-                    mediaPlayer.start();
+                    mMediaPlayer.start();
 
 
 
                     //Create a callback when audio  completed and releases audio
-                    mediaPlayer.setOnCompletionListener(mCompletionListener);
+                    mMediaPlayer.setOnCompletionListener(mCompletionListener);
 
 
 
@@ -183,40 +192,55 @@ public class ColorsActivity extends AppCompatActivity {
 
 
 
+
             }
         });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        return rootView;
     }
 
 
-    //Activity Callback when hidden
-    //Allow to release media player
     @Override
-    protected void onStop() {
+    public void onStop() {
         super.onStop();
-        //Release the media player
         releaseMediaPlayer();
     }
 
-
-
-
-
     private void releaseMediaPlayer() {
         // If the media player is not null, then it may be currently playing a sound.
-        if (mediaPlayer != null) {
+        if (mMediaPlayer != null) {
             // Regardless of the current state of the media player, release its resources
             // because we no longer need it.
-            mediaPlayer.release();
+            mMediaPlayer.release();
 
             // Set the media player back to null. For our code, we've decided that
             // setting the media player to null is an easy way to tell that the media player
             // is not configured to play an audio file at the moment.
-            mediaPlayer = null;
+            mMediaPlayer = null;
 
             // Regardless of whether or not we were granted audio focus, abandon it. This also
             // unregisters the AudioFocusChangeListener so we don't get anymore callbacks.
             mAudioManager.abandonAudioFocus(mOnAudioFocusChangeListener);
+
         }
     }
+
+
+
+
+
 }
